@@ -2,7 +2,7 @@
 
 import ConfigParser
 import ConfigReader
-from optparse import OptionParser
+from optparse import OptionParser, OptionGroup
 import MySQLdb, MySQLdb.cursors
 
 class Aliases:
@@ -46,22 +46,34 @@ class Aliases:
         
 def options(option_parser):
     option_parser.add_option("--show", action="store_true", 
-        dest="show", help="List aliases", default=True)
+        dest="show", help=
+        """List aliases. Alias and/or destination may be given 
+        but are optional.""", default=True)
     option_parser.add_option("-i", "--insert", action="store_true", 
-        dest="insert", help="Insert alias")
-    option_parser.add_option("-a", "--alias", 
-        dest="alias", help="Alias fragment")
-    option_parser.add_option("-d", "--destination",
+        dest="insert", help="""Insert alias. 
+        An alias and its destination must be given.""")
+        
+    params_group = OptionGroup(option_parser, "Values")
+    params_group.add_option("-a", "--alias", 
+        dest="alias", help="Alias fragment.")
+    params_group.add_option("-d", "--destination",
         dest="dest", help="Destination fragment")
+    option_parser.add_option_group(params_group)
     
-    return option_parser.parse_args()
+    (opts, args) = option_parser.parse_args()
+    if opts.insert and not (opts.alias and opts.dest):
+        option_parser.error("""
+        Alias and destination are required to add an alias."""
+        )
+    
+    return opts
     
 def main():
     opt = options(OptionParser())
     reader = Aliases()
     
-    if opt[0].show:
-        aliases = reader.get_aliases(opt[0].alias, opt[0].dest)
+    if opt.show:
+        aliases = reader.get_aliases(opt.alias, opt.dest)
         for alias in aliases:
             print alias['alias'], alias['destination']
         
