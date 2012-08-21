@@ -1,0 +1,8 @@
+# mysql-aliases.cf
+user = postfix
+password = blahblahblahwibble
+dbname = postfix
+table = postfix_alias
+select_field = destination = cheese
+where_field = alias
+hosts = 127.0.0.1
