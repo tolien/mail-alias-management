@@ -103,7 +103,7 @@ def main():
             for alias in aliases:
                 print alias['alias'], alias['destination']
     except PostfixConfig.NoPermissionException, exception:
-        print "No permission to read %S" %exception.get_filename()
+        print "No permission to read %s" %exception.get_filename()
         
      
 if __name__ == "__main__":
