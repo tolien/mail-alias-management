@@ -97,10 +97,13 @@ def main():
     opt = options(OptionParser())
     reader = Aliases()
     
-    if opt.show:
-        aliases = reader.get_aliases(dest = opt.dest, alias = opt.alias)
-        for alias in aliases:
-            print alias['alias'], alias['destination']
+    try:
+        if opt.show:
+            aliases = reader.get_aliases(dest = opt.dest, alias = opt.alias)
+            for alias in aliases:
+                print alias['alias'], alias['destination']
+    except PostfixConfig.NoPermissionException, exception:
+        print "No permission to read %S" %exception.get_filename()
         
      
 if __name__ == "__main__":

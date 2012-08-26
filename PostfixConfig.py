@@ -6,6 +6,16 @@ read_values: returns all config for a file
 get_value: returns a specific config item for a file
 """
 
+import os
+
+class NoPermissionException(Exception):
+    def __init__(self, filename):
+        Exception.__init__(self)
+        self.filename = filename
+        
+    def get_filename(self):
+        return self.filename
+        
 class Reader:
     def __init__(self, file):
         self.filename = file
@@ -16,8 +26,11 @@ class Reader:
         IOError will be thrown if the file referred to does not exist    
         """
         values = {}
-    
-        file_desc = open(self.filename)
+        
+        if os.access(self.filename, os.F_OK) and not os.access(self.filename, os.R_OK):
+            raise NoPermissionException(self.filename)
+        else:
+            file_desc = open(self.filename)
     
         for line in file_desc:
             pieces = line.split('=', 1)
