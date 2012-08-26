@@ -17,8 +17,8 @@ class NoPermissionException(Exception):
         return self.filename
         
 class Reader:
-    def __init__(self, file):
-        self.filename = file
+    def __init__(self, filename):
+        self.filename = filename
         
     def read_values(self):
         """Return all the config in the given file as a dictionary.
@@ -46,5 +46,6 @@ class Reader:
         """Get a specific config item from the config file specified.
     
         Throws IOError if the file cannot be read."""
+        
         all_values = self.read_values()
         return all_values[key]
