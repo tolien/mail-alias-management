@@ -2,7 +2,7 @@
 
 import ConfigParser
 import PostfixConfig
-from optparse import OptionParser, OptionGroup
+from argparse import ArgumentParser
 import MySQLdb, MySQLdb.cursors
 
 class Aliases:
@@ -69,39 +69,42 @@ class Aliases:
             print "Alias already exists!"
             
         
-def options(option_parser):
-    option_parser.add_option("--show", action="store_true", 
-        dest="show", help=
-        ("(default) List aliases. Alias and/or destination may be given"
-        "but are optional."), default=True)
-    option_parser.add_option("-i", "--insert", action="store_true", 
-        dest="insert", help=("Insert alias. "
-        "An alias and its destination must be given."))
+def options(parser):
+    mutex_group = parser.add_mutually_exclusive_group()
+    mutex_group.add_argument("-s", "--show", action="store_const",
+       const="show", dest="action", help=
+            ("(default) List aliases. Alias and/or destination may be given"
+            "but are optional."), default=True)
+    mutex_group.add_argument("-i", "--insert", action="store_const", 
+        const="insert", dest="action", help=("Insert alias. "
+            "An alias and its destination must be given."))
         
-    params_group = OptionGroup(option_parser, "Values")
-    params_group.add_option("-a", "--alias", 
+    params_group = parser.add_argument_group("Values")
+    params_group.add_argument("-a", "--alias", 
         dest="alias", help="Alias fragment.")
-    params_group.add_option("-d", "--destination",
+    params_group.add_argument("-d", "--destination",
         dest="dest", help="Destination fragment")
-    option_parser.add_option_group(params_group)
     
-    (opts, args) = option_parser.parse_args()
-    if opts.insert and not (opts.alias and opts.dest):
-        option_parser.error(
+    parser.set_defaults(action='show')
+    opts = parser.parse_args()
+    if opts.action == 'insert' and not (opts.alias and opts.dest):
+        parser.error(
         ("Alias and destination are required to add an alias.")
         )
     
     return opts
     
 def main():
-    opt = options(OptionParser())
+    opt = options(ArgumentParser())
     reader = Aliases()
     
     try:
-        if opt.show:
-            aliases = reader.get_aliases(dest = opt.dest, alias = opt.alias)
+        if opt.action == 'show':
+            aliases = reader.get_aliases(alias = opt.alias, dest=opt.dest)
             for alias in aliases:
                 print alias['alias'], alias['destination']
+        elif opt.action == 'insert':
+            aliases = reader.set_alias(dest=opt.dest, alias=opt.alias)
     except PostfixConfig.NoPermissionException, exception:
         print "No permission to read %s" %exception.get_filename()
         
