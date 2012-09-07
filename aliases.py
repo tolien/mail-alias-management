@@ -8,12 +8,13 @@ import MySQLdb, MySQLdb.cursors
 class Aliases:
     def __init__(self):    
         self.dbc = None
+        self.config_reader = None
 
     def get_dbc(self):
-        self.config = ConfigParser.SafeConfigParser()
+        config = ConfigParser.SafeConfigParser()
 
-        self.config.read('config.ini')
-        aliases_file = self.config.get('Postfix Config', 'alias_file')
+        config.read('config.ini')
+        aliases_file = config.get('Postfix Config', 'alias_file')
         self.config_reader = PostfixConfig.Reader(aliases_file)
     
         user = self.config_reader.get_value('user')
@@ -46,7 +47,6 @@ class Aliases:
                 query += "%s LIKE '%%%s%%' " % (destination_field, dest)
         query += "ORDER BY %s ASC" % (alias_field)
         
-        print query
         cursor = self.dbc.cursor()
         cursor.execute(query)
         alias_list = cursor.fetchall()
@@ -97,7 +97,7 @@ def options(parser):
 def main():
     opt = options(ArgumentParser())
     reader = Aliases()
-    
+
     try:
         if opt.action == 'show':
             aliases = reader.get_aliases(alias = opt.alias, dest=opt.dest)
@@ -106,7 +106,7 @@ def main():
         elif opt.action == 'insert':
             aliases = reader.set_alias(dest=opt.dest, alias=opt.alias)
     except PostfixConfig.NoPermissionException, exception:
-        print "No permission to read %s" %exception.get_filename()
+        print "No permission to read %s" % exception.get_filename()
         
      
 if __name__ == "__main__":
