@@ -8,12 +8,13 @@ import MySQLdb, MySQLdb.cursors
 class Aliases:
     def __init__(self):    
         self.dbc = None
+        self.config_file = 'config.ini'
         self.config_reader = None
 
     def get_dbc(self):
         config = ConfigParser.SafeConfigParser()
 
-        config.read('config.ini')
+        config.read(self.config_file)
         aliases_file = config.get('Postfix Config', 'alias_file')
         self.config_reader = PostfixConfig.Reader(aliases_file)
     
