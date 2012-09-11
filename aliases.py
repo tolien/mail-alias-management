@@ -64,21 +64,32 @@ class Aliases:
         alias_list = cursor.fetchall()
         return alias_list
         
-    def set_alias(self, alias='', dest='', overwrite=False):
+    def delete_alias(self, alias):
+        aliases = self.get_aliases(alias=alias)
+        if len(aliases) == 0:
+            raise NameError("Alias does not exist")
+        elif len(aliases) == 1:
+            table_name = self.config_reader.get_value('table')
+            alias_field = self.config_reader.get_value('where_field')
+            query = "DELETE FROM %s WHERE %s IS '%s'" % (table_name, alias_field, alias)
+            self.dbc.execute(query)            
+        
+    def insert_alias(self, alias='', dest='', overwrite=False):
         existing = self.get_aliases(alias=alias)
         if len(existing) == 0:
             table_name = self.config_reader.get_value('table')
             alias_field = self.config_reader.get_value('where_field')
             destination_field = self.config_reader.get_value('select_field')
                 
-            query = "INSERT INTO %s (%s, %s) VALUES (%s, %s)" \
+            query = "INSERT INTO %s (%s, %s) VALUES ('%s', '%s')" \
             % (table_name, alias_field, destination_field, alias, dest)
             
-            print query
+            self.dbc.execute(query)
         elif overwrite:
-            return
+            self.delete_alias(alias)
+            self.insert_alias(alias, dest, overwrite)
         else:
-            print "Alias already exists!"
+            raise NameError("Alias already exists!")
             
         
 def options(parser):
@@ -116,7 +127,7 @@ def main():
             for alias in aliases:
                 print alias['alias'], alias['destination']
         elif opt.action == 'insert':
-            aliases = reader.set_alias(dest=opt.dest, alias=opt.alias)
+            aliases = reader.insert_alias(dest=opt.dest, alias=opt.alias)
     except PostfixConfig.NoPermissionException, exception:
         print "No permission to read %s" % exception.get_filename()
         
