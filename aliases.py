@@ -1,5 +1,13 @@
 #!/usr/bin/python
 
+"""Aliases
+Accessor
+
+Functions:
+read_values: returns all config for a file
+get_value: returns a specific config item for a file
+"""
+
 import ConfigParser
 import PostfixConfig
 from argparse import ArgumentParser
@@ -11,13 +19,16 @@ class Aliases:
         self.config_file = 'config.ini'
         self.config_reader = None
 
-    def get_dbc(self):
+    def config_parser(self):
         config = ConfigParser.SafeConfigParser()
 
         config.read(self.config_file)
         aliases_file = config.get('Postfix Config', 'alias_file')
         self.config_reader = PostfixConfig.Reader(aliases_file)
     
+    def get_dbc(self):
+        if self.config_reader == None:
+            self.config_parser()
         user = self.config_reader.get_value('user')
         #host deliberately excluded - use localhost or go home
         password = self.config_reader.get_value('password')
