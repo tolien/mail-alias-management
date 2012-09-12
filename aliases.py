@@ -68,11 +68,13 @@ class Aliases:
         aliases = self.get_aliases(alias=alias)
         if len(aliases) == 0:
             raise NameError("Alias does not exist")
-        elif len(aliases) == 1:
+        elif len(aliases) == 1 and aliases[0]['alias'] == alias:
             table_name = self.config_reader.get_value('table')
             alias_field = self.config_reader.get_value('where_field')
             query = "DELETE FROM %s WHERE %s IS '%s'" % (table_name, alias_field, alias)
-            self.dbc.execute(query)            
+            self.dbc.execute(query)
+        else:
+            raise NameError("Alias matched multiple records")            
         
     def insert_alias(self, alias='', dest='', overwrite=False):
         existing = self.get_aliases(alias=alias)

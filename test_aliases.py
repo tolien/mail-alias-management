@@ -12,6 +12,7 @@ class TestAliases(unittest.TestCase):
         self.reader.config_file = self.test_data_root + 'config.ini'
         self.db_path = self.test_data_root + 'test.db'
         self.reader.dbc = sqlite3.connect(self.db_path, isolation_level=None)
+        self.reader.dbc.row_factory = sqlite3.Row
         self.reader.config_parser()
         self.setupDB()
 
@@ -52,15 +53,17 @@ class TestAliases(unittest.TestCase):
         self.assertEquals(1, 
             len(self.reader.get_aliases(alias='bob@bob.com')))        
         self.assertEquals('blah@bob.com', 
-            self.reader.get_aliases(alias='bob@bob.com')[0][1]
+            self.reader.get_aliases(alias='bob@bob.com')[0]['destination']
         )
         
         
     def test_delete_aliases(self):
         self.reader.delete_alias('bob@bob.com')
-        self.assertEquals(0, len(self.reader.get_aliases()))
-        
+        self.assertEquals(0, len(self.reader.get_aliases()))    
         self.assertRaises(NameError, self.reader.delete_alias, 'bob@bob.com')
+        
+    def test_delete_alias_fragment(self):
+        self.assertRaises(NameError, self.reader.delete_alias, 'bob')
 
 
 if __name__ == "__main__":
