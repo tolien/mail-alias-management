@@ -71,8 +71,9 @@ class Aliases:
         elif len(aliases) == 1 and aliases[0]['alias'] == alias:
             table_name = self.config_reader.get_value('table')
             alias_field = self.config_reader.get_value('where_field')
-            query = "DELETE FROM %s WHERE %s IS '%s'" % (table_name, alias_field, alias)
-            self.dbc.execute(query)
+            query = "DELETE FROM %s WHERE %s = '%s'" % (table_name, alias_field, alias)
+            cursor = self.dbc.cursor()
+            cursor.execute(query)
         else:
             raise NameError("Alias matched multiple records")            
         
@@ -86,7 +87,9 @@ class Aliases:
             query = "INSERT INTO %s (%s, %s) VALUES ('%s', '%s')" \
             % (table_name, alias_field, destination_field, alias, dest)
             
-            self.dbc.execute(query)
+            cursor = self.dbc.cursor()
+            cursor.execute(query)
+
         elif overwrite:
             self.delete_alias(alias)
             self.insert_alias(alias, dest, overwrite)
@@ -103,6 +106,8 @@ def options(parser):
     mutex_group.add_argument("-i", "--insert", action="store_const", 
         const="insert", dest="action", help=("Insert alias. "
             "An alias and its destination must be given."))
+    mutex_group.add_argument("--delete", action="store_const",
+        const="delete", dest="action", help="Delete alias.")
         
     params_group = parser.add_argument_group("Values")
     params_group.add_argument("-a", "--alias", 
@@ -115,6 +120,10 @@ def options(parser):
     if opts.action == 'insert' and not (opts.alias and opts.dest):
         parser.error(
         ("Alias and destination are required to add an alias.")
+        )
+    elif opts.action == 'delete' and not (opts.alias):
+        parser.error(
+            ("An alias must be specified.")
         )
     
     return opts
@@ -130,6 +139,8 @@ def main():
                 print alias['alias'], alias['destination']
         elif opt.action == 'insert':
             aliases = reader.insert_alias(dest=opt.dest, alias=opt.alias)
+        elif opt.action == 'delete':
+            reader.delete_alias(alias=opt.alias)
     except PostfixConfig.NoPermissionException, exception:
         print "No permission to read %s" % exception.get_filename()
         
