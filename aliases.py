@@ -136,7 +136,7 @@ def main():
         if opt.action == 'show':
             aliases = reader.get_aliases(alias = opt.alias, dest=opt.dest)
             for alias in aliases:
-                print alias['alias'], alias['destination']
+                print alias['alias'], '->', alias['destination']
         elif opt.action == 'insert':
             aliases = reader.insert_alias(dest=opt.dest, alias=opt.alias)
         elif opt.action == 'delete':
