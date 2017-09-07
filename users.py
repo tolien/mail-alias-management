@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """Aliases
 Accessor
@@ -8,7 +8,7 @@ read_values: returns all config for a file
 get_value: returns a specific config item for a file
 """
 
-import ConfigParser
+import configparser
 import PostfixConfig
 from argparse import ArgumentParser
 import MySQLdb, MySQLdb.cursors
@@ -20,7 +20,7 @@ class Aliases:
         self.config_reader = None
 
     def config_parser(self):
-        config = ConfigParser.SafeConfigParser()
+        config = configparser.ConfigParser()
 
         config.read(self.config_file)
         users_file = config.get('Postfix Config', 'users_file')
@@ -133,13 +133,13 @@ def main():
         if opt.action == 'show':
             aliases = reader.get_aliases(alias = None, dest = None)
             for alias in aliases:
-                print alias['email']
+                print(alias['email'])
         elif opt.action == 'insert':
             aliases = reader.insert_alias(dest=opt.dest, alias=opt.alias)
         elif opt.action == 'delete':
             reader.delete_alias(alias=opt.alias)
-    except PostfixConfig.NoPermissionException, exception:
-        print "No permission to read %s" % exception.get_filename()
+    except PostfixConfig.NoPermissionException as exception:
+        print("No permission to read %s" % exception.get_filename())
         
      
 if __name__ == "__main__":
