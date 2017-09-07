@@ -142,8 +142,8 @@ def main():
             aliases = reader.insert_alias(dest=opt.dest, alias=opt.alias)
         elif opt.action == 'delete':
             reader.delete_alias(alias=opt.alias)
-    except PostfixConfig.NoPermissionException as exception:
-        print("No permission to read %s" % exception.get_filename())
+    except PostfixConfig.FileAccessError as exception:
+        print(exception)
 
 
 if __name__ == "__main__":
