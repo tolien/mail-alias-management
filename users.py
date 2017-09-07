@@ -81,7 +81,7 @@ class Aliases:
         existing = self.get_aliases(alias=alias)
         if len(existing) == 0:
             table_name = self.config_reader.get_value('table')
-            alias_field = self.config_reader.get_value('where_field')
+            username_field = self.config_reader.get_value('where_field')
             destination_field = self.config_reader.get_value('select_field')
                 
             query = "INSERT INTO %s (%s, %s) VALUES ('%s', '%s')" \
